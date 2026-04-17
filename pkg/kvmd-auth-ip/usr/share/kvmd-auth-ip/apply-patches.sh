@@ -87,6 +87,20 @@ if anchor in content:
                     login = info.get("UserProfile", {}).get("LoginName", "")
                     if login and "@" in login:
                         user = login.split("@")[0]
+                    else:
+                        # Tagged device — try hostname lookup from config
+                        node_name = info.get("Node", {}).get("Name", "").split(".")[0]
+                        if node_name:
+                            try:
+                                for line in open("/etc/kvmd/ip-users.conf"):
+                                    line = line.strip()
+                                    if line and not line.startswith("#") and "=" in line:
+                                        conf_key, conf_user = line.split("=", 1)
+                                        if conf_key.strip() == node_name:
+                                            user = conf_user.strip()
+                                            break
+                            except FileNotFoundError:
+                                pass
             except Exception:
                 pass
         # 2) Check static IP map
