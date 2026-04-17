@@ -1,0 +1,10 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = kvmd
+
+[Action]
+Description = Reapplying kvmd-auth-ip patches...
+When = PostTransaction
+Exec = /usr/share/kvmd-auth-ip/apply-patches.sh
