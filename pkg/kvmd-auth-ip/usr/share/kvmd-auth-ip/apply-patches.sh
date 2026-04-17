@@ -51,16 +51,24 @@ if "ip-detect" in content or "ip_detect" in content:
 if "import subprocess" not in content:
     content = content.replace("from typing import ", "import subprocess\nimport json as _json\n\nfrom typing import ", 1)
 
-# Find the AuthApi class and add the ip-detect endpoint
-# Insert before the last method or at end of class
-# Look for the check_request_auth function (it's outside the class)
-anchor = "\nasync def check_request_auth"
+# Find the AuthApi class and add the ip-detect endpoint INSIDE the class.
+# Insert after the __check_handler method (last method in AuthApi).
+anchor = '    @exposed_http("GET", "/auth/check"'
 if anchor not in content:
-    anchor = "\ndef check_request_auth"
+    anchor = '@exposed_http("GET", "/auth/check"'
 
 if anchor in content:
+    # Find the end of __check_handler method (next method or end of class)
+    check_idx = content.find(anchor)
+    # Find the next @exposed_http or end of class after __check_handler
+    next_marker = content.find("\nasync def ", check_idx + 1)
+    if next_marker < 0:
+        next_marker = content.find("\ndef ", check_idx + 1)
+    if next_marker < 0:
+        next_marker = len(content)
+
     endpoint_code = '''
-    @exposed_http("GET", "/auth/ip-detect")
+    @exposed_http("GET", "/auth/ip-detect", auth_required=False, allow_usc=False)
     async def __ip_detect_handler(self, req: Request) -> Response:
         ip = req.headers.get("X-Real-IP", "")
         if not ip:
@@ -96,7 +104,7 @@ if anchor in content:
         return make_json_response({"user": user})
 
 '''
-    content = content.replace(anchor, endpoint_code + anchor, 1)
+    content = content[:next_marker] + endpoint_code + content[next_marker:]
     open(path, "w").write(content)
     print("[kvmd-auth-ip] PATCHED: auth.py (ip-detect endpoint)")
 else:

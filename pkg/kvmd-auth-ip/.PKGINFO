@@ -6,9 +6,9 @@ xdata = pkgtype=pkg
 pkgver = 1.0.0-1
 pkgdesc = IP-based auto-login for PiKVM - detects user by Tailscale or static IP mapping
 url = https://github.com/nullstacked/kvmd-auth-ip
-builddate = 1776388414
+builddate = 1776388508
 packager = Unknown Packager
-size = 5751
+size = 6175
 arch = any
 license = GPL3
 depend = kvmd
