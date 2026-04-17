@@ -85,7 +85,7 @@ if anchor in content:
                     info = _json.loads(result.stdout)
                     # Extract login name (before @)
                     login = info.get("UserProfile", {}).get("LoginName", "")
-                    if login:
+                    if login and "@" in login:
                         user = login.split("@")[0]
             except Exception:
                 pass

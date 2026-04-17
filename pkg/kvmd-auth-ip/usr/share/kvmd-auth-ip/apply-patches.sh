@@ -149,9 +149,14 @@ auto_login = '''$("user-input").focus();
 \t\t\t\t\tlet resp = JSON.parse(http.responseText);
 \t\t\t\t\tlet user = (resp.result || {}).user;
 \t\t\t\t\tif (user) {
-\t\t\t\t\t\t$("user-input").value = user;
-\t\t\t\t\t\t$("passwd-input").value = "1";
-\t\t\t\t\t\t$("login-button").click();
+\t\t\t\t\t\tlet body = "user=" + encodeURIComponent(user) + "&passwd=1&expire=0";
+\t\t\t\t\t\ttools.httpPost("api/auth/login", null, function(lhttp) {
+\t\t\t\t\t\t\tif (lhttp.status === 200) {
+\t\t\t\t\t\t\t\tlet dest = document.referrer || "/";
+\t\t\t\t\t\t\t\tif (dest.includes("/login")) dest = "/";
+\t\t\t\t\t\t\t\twindow.location.replace(dest);
+\t\t\t\t\t\t\t}
+\t\t\t\t\t\t}, body, "application/x-www-form-urlencoded");
 \t\t\t\t\t}
 \t\t\t\t} catch(e) {}
 \t\t\t}
