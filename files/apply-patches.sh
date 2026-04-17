@@ -188,6 +188,19 @@ fi
 # LOGIN_JS already exported above
 
 # ============================================================
+# Patch PiKVM nginx to trust gateway proxy (realip module)
+# ============================================================
+NGINX_SERVER_CONF="$CONF_DIR/nginx/kvmd.ctx-server.conf"
+if [ -f "$NGINX_SERVER_CONF" ]; then
+    if ! grep -q 'set_real_ip_from' "$NGINX_SERVER_CONF"; then
+        sed -i 's|absolute_redirect off;|# Trust gateway proxy to pass real client IP\nset_real_ip_from 192.168.100.133;\nreal_ip_header X-Real-IP;\nreal_ip_recursive on;\n\nabsolute_redirect off;|' "$NGINX_SERVER_CONF"
+        log "PATCHED: nginx realip (trust gateway)"
+    else
+        log "SKIPPED: nginx realip (already configured)"
+    fi
+fi
+
+# ============================================================
 # Patch nginx to pass original URL to login page
 # ============================================================
 NGINX_CONF="/etc/kvmd/nginx/kvmd.ctx-server.conf"
