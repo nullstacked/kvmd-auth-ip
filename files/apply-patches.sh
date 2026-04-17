@@ -49,7 +49,7 @@ if "ip-detect" in content or "ip_detect" in content:
 
 # Add imports at top if missing
 if "import subprocess" not in content:
-    content = content.replace("from typing import ", "import subprocess\nimport json as _json\n\nfrom typing import ", 1)
+    content = content.replace("import base64\n", "import base64\nimport subprocess\nimport json as _json\n", 1)
 
 # Find the AuthApi class and add the ip-detect endpoint INSIDE the class.
 # Insert after the __check_handler method (last method in AuthApi).
@@ -167,8 +167,8 @@ auto_login = '''$("user-input").focus();
 \t\t\t\t\t\tlet body = "user=" + encodeURIComponent(user) + "&passwd=1&expire=0";
 \t\t\t\t\t\ttools.httpPost("api/auth/login", null, function(lhttp) {
 \t\t\t\t\t\t\tif (lhttp.status === 200) {
-\t\t\t\t\t\t\t\tlet dest = document.referrer || "/";
-\t\t\t\t\t\t\t\tif (dest.includes("/login")) dest = "/";
+\t\t\t\t\t\t\t\tlet params = new URL(window.location.href).searchParams;
+\t\t\t\t\t\t\t\tlet dest = params.get("next") || "/";
 \t\t\t\t\t\t\t\twindow.location.replace(dest);
 \t\t\t\t\t\t\t}
 \t\t\t\t\t\t}, body, "application/x-www-form-urlencoded");
@@ -186,6 +186,20 @@ else
 fi
 
 # LOGIN_JS already exported above
+
+# ============================================================
+# Patch nginx to pass original URL to login page
+# ============================================================
+NGINX_CONF="/etc/kvmd/nginx/kvmd.ctx-server.conf"
+if [ -f "$NGINX_CONF" ]; then
+    if grep -q 'return 302 /login;' "$NGINX_CONF"; then
+        sed -i 's|return 302 /login;|return 302 /login?next=$request_uri;|' "$NGINX_CONF"
+        log "PATCHED: nginx (pass ?next= to login)"
+        systemctl restart kvmd-nginx 2>/dev/null || true
+    elif grep -q 'next=\$request_uri' "$NGINX_CONF"; then
+        log "SKIPPED: nginx (already patched)"
+    fi
+fi
 
 # ============================================================
 # Clear pycache + restart kvmd
