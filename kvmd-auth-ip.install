@@ -1,0 +1,24 @@
+post_install() {
+    /usr/share/kvmd-auth-ip/apply-patches.sh
+    echo ""
+    echo "kvmd-auth-ip: Installed."
+    echo ""
+    echo "  Users connecting from known IPs will be auto-logged in."
+    echo ""
+    echo "  Tailscale IPs (100.x) are detected automatically."
+    echo "  For LAN IPs, edit /etc/kvmd/ip-users.conf:"
+    echo "    192.168.100.55=david"
+    echo "    192.168.100.60=jesse"
+    echo ""
+    echo "  All user passwords must be set to '1' for auto-login:"
+    echo "    kvmd-htpasswd set -i <user>  (then type: 1)"
+    echo ""
+}
+
+post_upgrade() {
+    /usr/share/kvmd-auth-ip/apply-patches.sh
+}
+
+pre_remove() {
+    echo "kvmd-auth-ip: Removing patches. Run 'pacman -S kvmd' to restore original files."
+}
