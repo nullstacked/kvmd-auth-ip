@@ -32,7 +32,7 @@ fi
 # ============================================================
 # Patch api/auth.py — add /api/auth/ip-detect endpoint
 # ============================================================
-# AUTH_PY already exported above="$KVMD_DIR/apps/kvmd/api/auth.py"
+export AUTH_PY="$KVMD_DIR/apps/kvmd/api/auth.py"
 if [ -f "$AUTH_PY" ]; then
     python3 <<'PYEOF'
 import os, re
@@ -111,7 +111,7 @@ fi
 # ============================================================
 # Patch login/main.js — auto-login when IP detected
 # ============================================================
-# LOGIN_JS already exported above="$WEB_DIR/share/js/login/main.js"
+export LOGIN_JS="$WEB_DIR/share/js/login/main.js"
 if [ -f "$LOGIN_JS" ]; then
     python3 <<'PYEOF'
 import os
